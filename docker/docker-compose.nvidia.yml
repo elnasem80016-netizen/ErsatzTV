@@ -1,5 +1,5 @@
 ﻿services:
-    ersatztv:
+    freehd:
         privileged: true
         build:
             context: ..

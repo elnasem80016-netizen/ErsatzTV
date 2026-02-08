@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ الخلفيات - FreeHD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="color"],
+        select,
+        textarea {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="color"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: none;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-download {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-download:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .preview {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .preview-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            height: auto;
+            background: #f5f5f5;
+        }
+
+        .presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: #eee;
+            border-color: #667eea;
+        }
+
+        .preset-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .resolution-info {
+            background: #f0f7ff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            text-align: center;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .presets {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 منشئ الخلفيات</h1>
+        <p class="subtitle">أنشئ خلفيات احترافية لمشروعك FreeHD</p>
+
+        <div class="layout">
+            <div class="controls">
+                <div class="control-group">
+                    <label>اختر من الإعدادات الجاهزة:</label>
+                    <div class="presets">
+                        <button class="preset-btn" onclick="loadPreset('dark')">🌙 مظلم</button>
+                        <button class="preset-btn" onclick="loadPreset('light')">☀️ فاتح</button>
+                        <button class="preset-btn" onclick="loadPreset('gradient')">🌈 متدرج</button>
+                        <button class="preset-btn" onclick="loadPreset('streaming')">📺 بث</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>الدقة (Resolution):</label>
+                    <select id="resolution" onchange="updateResolution()">
+                        <option value="1280x720">1280x720 (720p)</option>
+                        <option value="1920x1080" selected>1920x1080 (1080p)</option>
+                        <option value="2560x1440">2560x1440 (2K)</option>
+                        <option value="3840x2160">3840x2160 (4K)</option>
+                    </select>
+                    <div class="resolution-info" id="resInfo">1920x1080</div>
+                </div>
+
+                <div class="control-group">
+                    <label>اللون الأول:</label>
+                    <input type="color" id="color1" value="#667eea" onchange="generateImage()">
+                </div>
+
+                <div class="control-group">
+                    <label>اللون الثاني:</label>
+                    <input type="color" id="color2" value="#764ba2" onchange="generateImage()">
+                </div>
+
+                <div class="control-group">
+                    <label>النص الرئيسي:</label>
+                    <input type="text" id="mainText" placeholder="FreeHD" value="FreeHD" onchange="generateImage()" oninput="generateImage()">
+                </div>
+
+                <div class="control-group">
+                    <label>النص الإضافي:</label>
+                    <input type="text" id="subText" placeholder="منصة بث مفتوحة المصدر" value="منصة بث مفتوحة المصدر" onchange="generateImage()" oninput="generateImage()">
+                </div>
+
+                <div class="control-group">
+                    <label>نوع الخلفية:</label>
+                    <select id="bgType" onchange="generateImage()">
+                        <option value="gradient">متدرج</option>
+                        <option value="pattern">نمط</option>
+                        <option value="solid">موحد</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-generate" onclick="generateImage()">🔄 توليد</button>
+                    <button class="btn-download" id="downloadBtn" onclick="downloadImage()" disabled>⬇️ تحميل</button>
+                </div>
+            </div>
+
+            <div class="preview">
+                <div class="preview-label">معاينة</div>
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let currentResolution = '1920x1080';
+
+        const presets = {
+            dark: {
+                color1: '#1a1a2e',
+                color2: '#16213e',
+                mainText: 'FreeHD',
+                subText: 'منصة بث مفتوحة المصدر',
+                bgType: 'gradient'
+            },
+            light: {
+                color1: '#f5f5f5',
+                color2: '#e0e0e0',
+                mainText: 'FreeHD',
+                subText: 'منصة بث مفتوحة المصدر',
+                bgType: 'gradient'
+            },
+            gradient: {
+                color1: '#667eea',
+                color2: '#764ba2',
+                mainText: 'FreeHD',
+                subText: 'منصة بث مفتوحة المصدر',
+                bgType: 'gradient'
+            },
+            streaming: {
+                color1: '#ff6b6b',
+                color2: '#004e89',
+                mainText: 'LIVE',
+                subText: 'بث مباشر',
+                bgType: 'pattern'
+            }
+        };
+
+        function updateResolution() {
+            currentResolution = document.getElementById('resolution').value;
+            const [w, h] = currentResolution.split('x').map(Number);
+            canvas.width = w;
+            canvas.height = h;
+            document.getElementById('resInfo').textContent = `${w}x${h}`;
+            generateImage();
+        }
+
+        function loadPreset(name) {
+            const preset = presets[name];
+            document.getElementById('color1').value = preset.color1;
+            document.getElementById('color2').value = preset.color2;
+            document.getElementById('mainText').value = preset.mainText;
+            document.getElementById('subText').value = preset.subText;
+            document.getElementById('bgType').value = preset.bgType;
+            
+            // تحديث الزر النشط
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            generateImage();
+        }
+
+        function generateImage() {
+            const [width, height] = currentResolution.split('x').map(Number);
+            canvas.width = width;
+            canvas.height = height;
+
+            const color1 = document.getElementById('color1').value;
+            const color2 = document.getElementById('color2').value;
+            const bgType = document.getElementById('bgType').value;
+            const mainText = document.getElementById('mainText').value;
+            const subText = document.getElementById('subText').value;
+
+            // رسم الخلفية
+            if (bgType === 'gradient') {
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, color1);
+                gradient.addColorStop(1, color2);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            } else if (bgType === 'pattern') {
+                ctx.fillStyle = color1;
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.fillStyle = color2;
+                const patternSize = 20;
+                for (let i = 0; i < width; i += patternSize * 2) {
+                    for (let j = 0; j < height; j += patternSize * 2) {
+                        ctx.fillRect(i, j, patternSize, patternSize);
+                    }
+                }
+            } else {
+                ctx.fillStyle = color1;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // إضافة عنصر ديكوري
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = color2;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.arc(
+                    Math.random() * width,
+                    Math.random() * height,
+                    Math.random() * 200 + 100,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // رسم النصوص
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+
+            // النص الرئيسي
+            const mainFontSize = Math.max(width / 8, 60);
+            ctx.font = `bold ${Math.floor(mainFontSize)}px Arial`;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            ctx.fillText(mainText, width / 2, height / 2 - 40);
+
+            // النص الإضافي
+            const subFontSize = Math.max(width / 24, 20);
+            ctx.font = `${Math.floor(subFontSize)}px Arial`;
+            ctx.shadowBlur = 5;
+            ctx.fillText(subText, width / 2, height / 2 + 40);
+
+            ctx.shadowColor = 'transparent';
+
+            // تفعيل زر التحميل
+            document.getElementById('downloadBtn').disabled = false;
+        }
+
+        function downloadImage() {
+            const name = document.getElementById('mainText').value || 'background';
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `${name}-${currentResolution}.png`;
+            link.click();
+        }
+
+        // توليد أول صورة
+        window.onload = () => {
+            updateResolution();
+        };
+    </script>
+</body>
+</html>
